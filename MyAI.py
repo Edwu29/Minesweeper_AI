@@ -58,30 +58,43 @@ class MyAI( AI ):
                 if ((x - 1) >= 0):
                     # top left
                     if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
+                        self.type[x - 1, y - 1] == "marked"
                         return Action(AI.Action.UNCOVER, x - 1, y - 1)
                     # top center
                     elif (self.type[x - 1, y] == "unmarked"):
+                        self.type[x - 1, y] == "marked"
                         return Action(AI.Action.UNCOVER, x - 1, y)
                     # top right
                     elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
+                        self.type[x - 1, y + 1] == "marked"
                         return Action(AI.Action.UNCOVER, x - 1, y + 1)
                 # middle left
                 if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
+                    self.type[x, y - 1] == "marked"
                     return Action(AI.Action.UNCOVER, x, y - 1)
                 # middle right
                 if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
+                    self.type[x, y + 1] == "marked"
                     return Action(AI.Action.UNCOVER, x, y + 1)
                 # bottom row
                 if ((x + 1) < self.rowDimension):
                     # bottom left
                     if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
+                        self.type[x + 1, y - 1] == "marked"
                         return Action(AI.Action.UNCOVER, x + 1, y - 1)
                     # bottom center
                     elif (self.type[x + 1, y] == "unmarked"):
+                        self.type[x + 1, y] == "marked"
                         return Action(AI.Action.UNCOVER, x + 1, y)
                     # bottom right
                     elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
+                        self.type[x + 1, y + 1] == "marked"
                         return Action(AI.Action.UNCOVER, x + 1, y + 1)
+            
+            # if self.efflabel[x, y] (effective label) == numUnmarkedNeighbors, then all of them must be mines, we can flag them,
+            # this reduces the effective label of other tiles within the window. 
+            if self.efflabel[x, y] == getNumUnmarkedNeighbors(x, y):
+                pass
             
             # if self.efflabel[x, y] (effective label) == numUnmarkedNeighbors, then all of them must be mines, we can flag them,
             # this reduces the effective label of other tiles within the window. 
