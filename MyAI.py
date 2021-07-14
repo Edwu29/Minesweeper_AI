@@ -27,7 +27,7 @@ class MyAI( AI ):
         self.__numFlagged = 0
         
         #create board
-        self.board = np.full((rowDimension, colDimension), tuple(-1, -1, "uncovered")) #label, effective label, type(uncovered, flagged, unflagged)
+        self.board = np.full((rowDimension, colDimension), (-1, -1, "uncovered")) #label, effective label, type(uncovered, flagged, unflagged)
         
         #UNCOVER the startX and startY
         self.currentAction = Action(AI.Action.UNCOVER, startX, startY)
@@ -55,10 +55,11 @@ class MyAI( AI ):
             #this reduces the effective label of other tiles within the window. 
             
 
+            
 
 
     
-    def getnumMarkedNeighbors(self, x: int, y: int) -> numMarkedNeighbors:
+    def getnumMarkedNeighbors(self, x: int, y: int):
         numMarkedNeighbors = 0
         if self.board[x-1, y+1][2] == "flagged":
             numMarkedNeighbors +=1
@@ -77,8 +78,8 @@ class MyAI( AI ):
         if self.board[x-1, y][2] == "flagged":
             numMarkedNeighbors +=1 
         return numMarkedNeighbors
-    def getnumUnmarkedNeighbors(self, x: int, y: int) -> numUnmarkedNeighbors:
+    def getnumUnmarkedNeighbors(self, x: int, y: int):
         return 9 - getnumMarkedNeighbors(x, y)
     
-    def getCoordOfUnmarkedTile(self, x: int, y: int) -> (x: int, y: int):
+    def getCoordOfUnmarkedTile(self, x: int, y: int):
         pass
