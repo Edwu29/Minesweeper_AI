@@ -53,13 +53,14 @@ class MyAI( AI ):
             # check if self.efflabel[x, y] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
             if self.efflabel[x, y] == 0:
                 # check surrounding
+                
                 print(x, y)
                 print(self.efflabel[x, y])
+        
                 # top
                 if ((x - 1) >= 0):
                     # top left
                     if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
-                        print("hello")
                         self.type[x - 1, y - 1] = "uncovered"
                         self.currentAction = Action(AI.Action.UNCOVER, x - 1, y - 1)
                         return self.currentAction
@@ -248,3 +249,4 @@ class MyAI( AI ):
         self.efflabel[x - 1, y - 1]-=1
         self.efflabel[x - 1, y]-=1
         return
+
