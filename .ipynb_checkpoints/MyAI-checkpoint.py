@@ -50,114 +50,20 @@ class MyAI( AI ):
             numMarkedNeighbors = self.getNumMarkedNeighbors(x, y)
             self.efflabel[x, y] = self.board[x, y] - numMarkedNeighbors
             
+            #print(x, y)
+            #print(self.efflabel[x, y])
+            #print(self.getNumUnmarkedNeighbors(x, y))
             # check if self.efflabel[x, y] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
             if self.efflabel[x, y] == 0:
                 # check surrounding
-                
-                print(x, y)
-                print(self.efflabel[x, y])
-        
-                # top
-                if ((x - 1) >= 0):
-                    # top left
-                    if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
-                        self.type[x - 1, y - 1] = "uncovered"
-                        self.currentAction = Action(AI.Action.UNCOVER, x - 1, y - 1)
-                        return self.currentAction
-                    # top center
-                    elif (self.type[x - 1, y] == "unmarked"):
-                        self.type[x - 1, y] = "uncovered"
-                        self.currentAction = Action(AI.Action.UNCOVER, x - 1, y)
-                        return self.currentAction
-                    # top right
-                    elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
-                        self.type[x - 1, y + 1] = "uncovered"
-                        self.currentAction = Action(AI.Action.UNCOVER, x - 1, y + 1)
-                        return self.currentAction
-                # middle left
-                if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
-                    self.type[x, y - 1] = "uncovered"
-                    self.currentAction = Action(AI.Action.UNCOVER, x, y - 1)
-                    return self.currentAction
-                # middle right
-                if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
-                    self.type[x, y + 1] = "uncovered"
-                    self.currentAction = Action(AI.Action.UNCOVER, x, y + 1)
-                    return self.currentAction
-                # bottom row
-                if ((x + 1) < self.rowDimension):
-                    # bottom left
-                    if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
-                        self.type[x + 1, y - 1] = "uncovered"
-                        self.currentAction = Action(AI.Action.UNCOVER, x + 1, y - 1)
-                        return self.currentAction
-                    # bottom center
-                    elif (self.type[x + 1, y] == "unmarked"):
-                        self.type[x + 1, y] = "uncovered"
-                        self.currentAction = Action(AI.Action.UNCOVER, x + 1, y)
-                        return self.currentAction
-                    # bottom right
-                    elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
-                        self.type[x + 1, y + 1] = "uncovered"
-                        self.currentAction = Action(AI.Action.UNCOVER, x + 1, y + 1)
-                        return self.currentAction
+                return self.uncoverUnmarkedTile(x, y)
 
             # if self.efflabel[x, y] (effective label) == numUnmarkedNeighbors, then all of them must be mines, we can flag them,
             # this reduces the effective label of other tiles within the window.
             if self.efflabel[x, y] == self.getNumUnmarkedNeighbors(x, y):
-                if ((x - 1) >= 0):
-                    # top left
-                    if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
-                        self.type[x - 1, y - 1] = "marked"
-                        self.updateSurroundings(x - 1, y - 1)
-                        self.currentAction = Action(AI.Action.FLAG, x - 1, y - 1)
-                        return self.currentAction
-                    # top center
-                    elif (self.type[x - 1, y] == "unmarked"):
-                        self.type[x - 1, y] = "marked"
-                        self.updateSurroundings(x - 1, y)
-                        self.currentAction = Action(AI.Action.FLAG, x - 1, y)
-                        return self.currentAction
-                    # top right
-                    elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
-                        self.type[x - 1, y + 1] = "marked"
-                        self.updateSurroundings(x - 1, y + 1)
-                        self.currentAction = Action(AI.Action.FLAG, x - 1, y + 1)
-                        return self.currentAction
-                # middle left
-                if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
-                    self.type[x, y - 1] = "marked"
-                    self.updateSurroundings(x, y - 1)
-                    self.currentAction = Action(AI.Action.FLAG, x, y - 1)
-                    return self.currentAction
-                # middle right
-                if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
-                    self.type[x, y + 1] = "marked"
-                    self.updateSurroundings(x, y + 1)
-                    self.currentAction = Action(AI.Action.FLAG, x, y + 1)
-                    return self.currentAction
-                # bottom row
-                if ((x + 1) < self.rowDimension):
-                    # bottom left
-                    if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
-                        self.type[x + 1, y - 1] = "marked"
-                        self.updateSurroundings(x + 1, y - 1)
-                        self.currentAction = Action(AI.Action.FLAG, x + 1, y - 1)
-                        return self.currentAction
-                    # bottom center
-                    elif (self.type[x + 1, y] == "unmarked"):
-                        self.type[x + 1, y] = "marked"
-                        self.updateSurroundings(x + 1, y)
-                        self.currentAction = Action(AI.Action.FLAG, x + 1, y)
-                        return self.currentAction
-                    # bottom right
-                    elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
-                        self.type[x + 1, y + 1] = "marked"
-                        self.updateSurroundings(x + 1, y + 1)
-                        self.currentAction = Action(AI.Action.FLAG, x + 1, y + 1)
-                        return self.currentAction
-            
-    
+                return self.markAndDecrementNeighbors(x, y)
+                
+                
     def getNumMarkedNeighbors(self, x: int, y: int):
         numMarkedNeighbors = 0
         
@@ -250,3 +156,102 @@ class MyAI( AI ):
         self.efflabel[x - 1, y]-=1
         return
 
+    #Mark the tile and decrement its neighbors effective label by 1
+    def markAndDecrementNeighbors(self, x: int, y: int):
+        if ((x - 1) >= 0):
+            # top left
+            if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
+                self.type[x - 1, y - 1] = "marked"
+                self.updateSurroundings(x - 1, y - 1)
+                self.currentAction = Action(AI.Action.FLAG, x - 1, y - 1)
+                return self.currentAction
+            # top center
+            elif (self.type[x - 1, y] == "unmarked"):
+                self.type[x - 1, y] = "marked"
+                self.updateSurroundings(x - 1, y)
+                self.currentAction = Action(AI.Action.FLAG, x - 1, y)
+                return self.currentAction
+            # top right
+            elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
+                self.type[x - 1, y + 1] = "marked"
+                self.updateSurroundings(x - 1, y + 1)
+                self.currentAction = Action(AI.Action.FLAG, x - 1, y + 1)
+                return self.currentAction
+        # middle left
+        if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
+            self.type[x, y - 1] = "marked"
+            self.updateSurroundings(x, y - 1)
+            self.currentAction = Action(AI.Action.FLAG, x, y - 1)
+            return self.currentAction
+        # middle right
+        if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
+            self.type[x, y + 1] = "marked"
+            self.updateSurroundings(x, y + 1)
+            self.currentAction = Action(AI.Action.FLAG, x, y + 1)
+            return self.currentAction
+        # bottom row
+        if ((x + 1) < self.rowDimension):
+            # bottom left
+            if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
+                self.type[x + 1, y - 1] = "marked"
+                self.updateSurroundings(x + 1, y - 1)
+                self.currentAction = Action(AI.Action.FLAG, x + 1, y - 1)
+                return self.currentAction
+            # bottom center
+            elif (self.type[x + 1, y] == "unmarked"):
+                self.type[x + 1, y] = "marked"
+                self.updateSurroundings(x + 1, y)
+                self.currentAction = Action(AI.Action.FLAG, x + 1, y)
+                return self.currentAction
+            # bottom right
+            elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
+                self.type[x + 1, y + 1] = "marked"
+                self.updateSurroundings(x + 1, y + 1)
+                self.currentAction = Action(AI.Action.FLAG, x + 1, y + 1)
+                return self.currentAction
+    #
+    def uncoverUnmarkedTile(self, x: int, y: int):
+        # top
+        if ((x - 1) >= 0):
+            # top left
+            if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
+                self.type[x - 1, y - 1] = "uncovered"
+                self.currentAction = Action(AI.Action.UNCOVER, x - 1, y - 1)
+                return self.currentAction
+            # top center
+            elif (self.type[x - 1, y] == "unmarked"):
+                self.type[x - 1, y] = "uncovered"
+                self.currentAction = Action(AI.Action.UNCOVER, x - 1, y)
+                return self.currentAction
+            # top right
+            elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
+                self.type[x - 1, y + 1] = "uncovered"
+                self.currentAction = Action(AI.Action.UNCOVER, x - 1, y + 1)
+                return self.currentAction
+        # middle left
+        if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
+            self.type[x, y - 1] = "uncovered"
+            self.currentAction = Action(AI.Action.UNCOVER, x, y - 1)
+            return self.currentAction
+        # middle right
+        if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
+            self.type[x, y + 1] = "uncovered"
+            self.currentAction = Action(AI.Action.UNCOVER, x, y + 1)
+            return self.currentAction
+        # bottom row
+        if ((x + 1) < self.rowDimension):
+            # bottom left
+            if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
+                self.type[x + 1, y - 1] = "uncovered"
+                self.currentAction = Action(AI.Action.UNCOVER, x + 1, y - 1)
+                return self.currentAction
+            # bottom center
+            elif (self.type[x + 1, y] == "unmarked"):
+                self.type[x + 1, y] = "uncovered"
+                self.currentAction = Action(AI.Action.UNCOVER, x + 1, y)
+                return self.currentAction
+            # bottom right
+            elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
+                self.type[x + 1, y + 1] = "uncovered"
+                self.currentAction = Action(AI.Action.UNCOVER, x + 1, y + 1)
+                return self.currentAction
