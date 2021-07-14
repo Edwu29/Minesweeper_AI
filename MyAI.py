@@ -98,7 +98,7 @@ class MyAI( AI ):
                 if ((x - 1) >= 0):
                     # top left
                     if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
-                        self.type[x - 1, y - 1] == "marked"
+                        self.type[x - 1, y - 1] = "marked"
                         self.updateSurroundings(x - 1, y - 1)
                         return Action(AI.Action.FLAG, x - 1, y - 1)
                     # top center
@@ -143,7 +143,7 @@ class MyAI( AI ):
     def getNumMarkedNeighbors(self, x: int, y: int):
         numMarkedNeighbors = 0
         
-        try: 
+        try:
             if self.type[x - 1, y + 1] == "marked": numMarkedNeighbors +=1
         except: pass
         
