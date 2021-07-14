@@ -53,12 +53,10 @@ class MyAI( AI ):
             # check if self.efflabel[x, y] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
             if self.efflabel[x, y] == 0:
                 # check surrounding
-                
                 # top
                 if ((x - 1) >= 0):
                     # top left
                     if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
-                        print("hello")
                         self.type[x - 1, y - 1] = "uncovered"
                         return Action(AI.Action.UNCOVER, x - 1, y - 1)
                     # top center
@@ -98,44 +96,44 @@ class MyAI( AI ):
                 if ((x - 1) >= 0):
                     # top left
                     if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
-                        self.type[x - 1, y - 1] == "marked"
+                        self.type[x - 1, y - 1] = "marked"
                         self.updateSurroundings(x - 1, y - 1)
                         return Action(AI.Action.FLAG, x - 1, y - 1)
                     # top center
                     elif (self.type[x - 1, y] == "unmarked"):
-                        self.type[x - 1, y] == "marked"
+                        self.type[x - 1, y] = "marked"
                         self.updateSurroundings(x - 1, y)
                         return Action(AI.Action.FLAG, x - 1, y)
                     # top right
                     elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
-                        self.type[x - 1, y + 1] == "marked"
+                        self.type[x - 1, y + 1] = "marked"
                         self.updateSurroundings(x - 1, y + 1)
                         return Action(AI.Action.FLAG, x - 1, y + 1)
                 # middle left
                 if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
-                    self.type[x, y - 1] == "marked"
+                    self.type[x, y - 1] = "marked"
                     self.updateSurroundings(x, y - 1)
                     return Action(AI.Action.FLAG, x, y - 1)
                 # middle right
                 if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
-                    self.type[x, y + 1] == "marked"
+                    self.type[x, y + 1] = "marked"
                     self.updateSurroundings(x, y + 1)
                     return Action(AI.Action.FLAG, x, y + 1)
                 # bottom row
                 if ((x + 1) < self.rowDimension):
                     # bottom left
                     if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
-                        self.type[x + 1, y - 1] == "marked"
+                        self.type[x + 1, y - 1] = "marked"
                         self.updateSurroundings(x + 1, y - 1)
                         return Action(AI.Action.FLAG, x + 1, y - 1)
                     # bottom center
                     elif (self.type[x + 1, y] == "unmarked"):
-                        self.type[x + 1, y] == "marked"
+                        self.type[x + 1, y] = "marked"
                         self.updateSurroundings(x + 1, y)
                         return Action(AI.Action.FLAG, x + 1, y)
                     # bottom right
                     elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
-                        self.type[x + 1, y + 1] == "marked"
+                        self.type[x + 1, y + 1] = "marked"
                         self.updateSurroundings(x + 1, y + 1)
                         return Action(AI.Action.FLAG, x + 1, y + 1)
             
@@ -231,3 +229,4 @@ class MyAI( AI ):
         self.efflabel[x - 1, y - 1]-=1
         self.efflabel[x - 1, y]-=1
         return
+
