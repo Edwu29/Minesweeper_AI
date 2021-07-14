@@ -142,28 +142,36 @@ class MyAI( AI ):
     def getNumMarkedNeighbors(self, x: int, y: int):
         numMarkedNeighbors = 0
         
-        try: if self.type[x - 1, y + 1] == "marked": numMarkedNeighbors +=1
+        try: 
+            if self.type[x - 1, y + 1] == "marked": numMarkedNeighbors +=1
         except: pass
         
-        try: if self.type[x, y + 1] == "marked": numMarkedNeighbors +=1
+        try: 
+            if self.type[x, y + 1] == "marked": numMarkedNeighbors +=1
         except: pass
         
-        try: if self.type[x + 1, y + 1] == "marked": numMarkedNeighbors +=1  
+        try: 
+            if self.type[x + 1, y + 1] == "marked": numMarkedNeighbors +=1  
         except: pass
         
-        try: if self.type[x + 1, y] == "marked": numMarkedNeighbors +=1  
+        try: 
+            if self.type[x + 1, y] == "marked": numMarkedNeighbors +=1  
         except: pass
         
-        try: if self.type[x + 1, y - 1] == "marked": numMarkedNeighbors +=1 
+        try: 
+            if self.type[x + 1, y - 1] == "marked": numMarkedNeighbors +=1 
         except: pass
         
-        try: if self.type[x, y - 1] == "marked": numMarkedNeighbors +=1 
+        try: 
+            if self.type[x, y - 1] == "marked": numMarkedNeighbors +=1 
         except: pass
         
-        try: if self.type[x - 1, y - 1] == "marked": numMarkedNeighbors +=1
+        try: 
+            if self.type[x - 1, y - 1] == "marked": numMarkedNeighbors +=1
         except: pass
         
-        try: if self.type[x - 1, y] == "marked": numMarkedNeighbors +=1 
+        try: 
+            if self.type[x - 1, y] == "marked": numMarkedNeighbors +=1 
         except: pass
         
         return numMarkedNeighbors
