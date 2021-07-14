@@ -175,28 +175,36 @@ class MyAI( AI ):
     def getNumUncoveredTiles(self, x: int, y: int):
         uncoveredTiles = 0
         
-        try: if self.type[x - 1, y + 1] == "uncovered": uncoveredTiles +=1
+        try: 
+            if self.type[x - 1, y + 1] == "uncovered": uncoveredTiles +=1
         except: pass
         
-        try: if self.type[x, y + 1] == "uncovered": uncoveredTiles +=1
+        try: 
+            if self.type[x, y + 1] == "uncovered": uncoveredTiles +=1
         except: pass
         
-        try: if self.type[x + 1, y + 1] == "uncovered": uncoveredTiles +=1  
+        try: 
+            if self.type[x + 1, y + 1] == "uncovered": uncoveredTiles +=1  
         except: pass
         
-        try: if self.type[x + 1, y] == "uncovered": uncoveredTiles +=1  
+        try: 
+            if self.type[x + 1, y] == "uncovered": uncoveredTiles +=1  
         except: pass
         
-        try: if self.type[x + 1, y - 1] == "uncovered": uncoveredTiles +=1 
+        try: 
+            if self.type[x + 1, y - 1] == "uncovered": uncoveredTiles +=1 
         except: pass
         
-        try: if self.type[x, y - 1] == "uncovered": uncoveredTiles +=1 
+        try: 
+            if self.type[x, y - 1] == "uncovered": uncoveredTiles +=1 
         except: pass
         
-        try: if self.type[x - 1, y - 1] == "uncovered": uncoveredTiles +=1
+        try: 
+            if self.type[x - 1, y - 1] == "uncovered": uncoveredTiles +=1
         except: pass
         
-        try: if self.type[x - 1, y] == "uncovered": uncoveredTiles +=1 
+        try: 
+            if self.type[x - 1, y] == "uncovered": uncoveredTiles +=1 
         except: pass
         
         return uncoveredTiles
