@@ -27,8 +27,9 @@ class MyAI( AI ):
         self.__numFlagged = 0
         
         #create board
-        self.board = np.full((rowDimension, colDimension), (-1, -1, "uncovered")) #label, effective label, type(uncovered, flagged, unflagged)
-        
+        self.board = np.full((rowDimension, colDimension), -1) #label, effective label, type(covered, uncovered, flagged, unflagged)
+        self.efflabel = np.full((rowDimension, colDimension), -1)
+        self.type = np.full((rowDimension, colDimension), "covered")
         #UNCOVER the startX and startY
         self.currentAction = Action(AI.Action.UNCOVER, startX, startY)
         
@@ -42,13 +43,14 @@ class MyAI( AI ):
         y=self.currentAction.getY()
         # if the previous action was an UNCOVER action, update the board
         if number != -1:
-            self.board[x, y][0] = number
+            self.type[x, y] = "uncovered"
+            self.board[x, y] = number
         
             #effectivelabel(x) = label(x) - numMarkedNeighbors(x)
             numMarkedNeighbors = getnumMarkedNeighbors(x, y)
-            self.board[x, y][1] = self.board[x, y][0] - numMarkedNeighbors
+            self.efflabel[x, y] = self.board[x, y] - numMarkedNeighbors
             
-            #check if self.board[x, y][1] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
+            #check if self.efflabel[x, y] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
             
     
             #if self.board[x, y][1] (effective label) == numUnmarkedNeighbors, then all of them must be mines, we can flag them,
@@ -61,21 +63,21 @@ class MyAI( AI ):
     
     def getnumMarkedNeighbors(self, x: int, y: int):
         numMarkedNeighbors = 0
-        if self.board[x-1, y+1][2] == "flagged":
+        if self.type[x-1, y+1] == "flagged":
             numMarkedNeighbors +=1
-        if self.board[x, y+1][2] == "flagged":
+        if self.type[x, y+1] == "flagged":
             numMarkedNeighbors +=1
-        if self.board[x+1, y+1][2] == "flagged":
+        if self.type[x+1, y+1] == "flagged":
             numMarkedNeighbors +=1  
-        if self.board[x+1, y][2] == "flagged":
+        if self.type[x+1, y] == "flagged":
             numMarkedNeighbors +=1  
-        if self.board[x+1, y-1][2] == "flagged":
+        if self.type[x+1, y-1] == "flagged":
             numMarkedNeighbors +=1 
-        if self.board[x, y-1][2] == "flagged":
+        if self.type[x, y-1] == "flagged":
             numMarkedNeighbors +=1 
-        if self.board[x-1, y-1][2] == "flagged":
+        if self.type[x-1, y-1] == "flagged":
             numMarkedNeighbors +=1 
-        if self.board[x-1, y][2] == "flagged":
+        if self.type[x-1, y] == "flagged":
             numMarkedNeighbors +=1 
         return numMarkedNeighbors
     def getnumUnmarkedNeighbors(self, x: int, y: int):
