@@ -170,6 +170,7 @@ class MyAI( AI ):
     
     
     def getNumUnmarkedNeighbors(self, x: int, y: int):
+<<<<<<< HEAD
         return 9 - getNumMarkedNeighbors(x, y)- getNumUncoveredTiles(x, y)
     
     def getNumUncoveredTiles(self, x: int, y: int):
@@ -200,11 +201,16 @@ class MyAI( AI ):
         except: pass
         
         return uncoveredTiles
+=======
+        return 9 - getNumMarkedNeighbors(x, y)
+    
+>>>>>>> 7ae8a2f9d35dfc62b3538fc5dee5324cce395a3e
     
     def getCoordOfUnmarkedTile(self, x: int, y: int):
         pass
     
     def updateSurroundings(self, x, y):
+<<<<<<< HEAD
         self.efflabel[x - 1, y + 1]-=1
         self.efflabel[x, y + 1]-=1
         self.efflabel[x + 1, y + 1]-=1
@@ -214,3 +220,6 @@ class MyAI( AI ):
         self.efflabel[x - 1, y - 1]-=1
         self.efflabel[x - 1, y]-=1
         return
+=======
+        pass
+>>>>>>> 7ae8a2f9d35dfc62b3538fc5dee5324cce395a3e
