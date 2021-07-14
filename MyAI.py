@@ -27,9 +27,9 @@ class MyAI( AI ):
         self.__numFlagged = 0
         
         #create board
-        self.board = np.full((rowDimension, colDimension), -1) #label, effective label, type(covered, uncovered, flagged, unflagged)
+        self.board = np.full((rowDimension, colDimension), -1) #label, effective label, type(uncovered, flagged, unflagged)
         self.efflabel = np.full((rowDimension, colDimension), -1)
-        self.type = np.full((rowDimension, colDimension), "covered")
+        self.type = np.full((rowDimension, colDimension), "unflagged")
         #UNCOVER the startX and startY
         self.currentAction = Action(AI.Action.UNCOVER, startX, startY)
         
