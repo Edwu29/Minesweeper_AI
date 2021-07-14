@@ -170,8 +170,36 @@ class MyAI( AI ):
     
     
     def getNumUnmarkedNeighbors(self, x: int, y: int):
-        return 9 - getNumMarkedNeighbors(x, y)
+        return 9 - getNumMarkedNeighbors(x, y)- getNumUncoveredTiles(x, y)
     
+    def getNumUncoveredTiles(self, x: int, y: int):
+        uncoveredTiles = 0
+        
+        try: if self.type[x - 1, y + 1] == "uncovered": uncoveredTiles +=1
+        except: pass
+        
+        try: if self.type[x, y + 1] == "uncovered": uncoveredTiles +=1
+        except: pass
+        
+        try: if self.type[x + 1, y + 1] == "uncovered": uncoveredTiles +=1  
+        except: pass
+        
+        try: if self.type[x + 1, y] == "uncovered": uncoveredTiles +=1  
+        except: pass
+        
+        try: if self.type[x + 1, y - 1] == "uncovered": uncoveredTiles +=1 
+        except: pass
+        
+        try: if self.type[x, y - 1] == "uncovered": uncoveredTiles +=1 
+        except: pass
+        
+        try: if self.type[x - 1, y - 1] == "uncovered": uncoveredTiles +=1
+        except: pass
+        
+        try: if self.type[x - 1, y] == "uncovered": uncoveredTiles +=1 
+        except: pass
+        
+        return uncoveredTiles
     
     def getCoordOfUnmarkedTile(self, x: int, y: int):
         pass
