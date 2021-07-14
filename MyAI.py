@@ -50,9 +50,9 @@ class MyAI( AI ):
             numMarkedNeighbors = self.getNumMarkedNeighbors(x, y)
             self.efflabel[x, y] = self.board[x, y] - numMarkedNeighbors
             
-            #print(x, y)
-            #print(self.efflabel[x, y])
-            #print(self.getNumUnmarkedNeighbors(x, y))
+            print(x, y)
+            print(self.efflabel[x, y])
+            print(self.getNumUnmarkedNeighbors(x, y))
             # check if self.efflabel[x, y] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
             if self.efflabel[x, y] == 0:
                 # check surrounding
