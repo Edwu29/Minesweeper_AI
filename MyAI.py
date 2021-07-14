@@ -20,11 +20,11 @@ import numpy as np
 class MyAI( AI ):
 
     def __init__(self, rowDimension, colDimension, totalMines, startX, startY):
-        self.__rowDimension = rowDimension
-        self.__colDimension = colDimension
-        self.__totalMines = totalMines
-        self.__numUncovered = 0
-        self.__numFlagged = 0
+        self.rowDimension = rowDimension
+        self.colDimension = colDimension
+        self.totalMines = totalMines
+        self.numUncovered = 0
+        self.numFlagged = 0
         
         #create board
         self.board = np.full((rowDimension, colDimension), -1) #label, effective label, type(covered, uncovered, flagged, unflagged)
@@ -36,18 +36,18 @@ class MyAI( AI ):
         
     def getAction(self, number: int) -> "Action Object":
         #successful goal state
-        if (self.__rowDimension*self.__colDimension) - self.__totalMines == self.__numUncovered:
+        if (self.rowDimension*self.colDimension) - self.totalMines == self.numUncovered:
             return Action(AI.Action.LEAVE)
         
         x=self.currentAction.getX()
         y=self.currentAction.getY()
         # if the previous action was an UNCOVER action, update the board
         if number != -1:
-            self.type[x, y] = "uncovered"
+            self.type[x, y] = "unmarked"
             self.board[x, y] = number
         
             #effectivelabel(x) = label(x) - numMarkedNeighbors(x)
-            numMarkedNeighbors = self.getnumMarkedNeighbors(x, y)
+            numMarkedNeighbors = self.getNumMarkedNeighbors(x, y)
             self.efflabel[x, y] = self.board[x, y] - numMarkedNeighbors
             
             # check if self.efflabel[x, y] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
@@ -90,52 +90,53 @@ class MyAI( AI ):
                     elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
                         self.type[x + 1, y + 1] == "uncovered"
                         return Action(AI.Action.UNCOVER, x + 1, y + 1)
-            
+
             # if self.efflabel[x, y] (effective label) == numUnmarkedNeighbors, then all of them must be mines, we can flag them,
-            # this reduces the effective label of other tiles within the window. 
-            if self.efflabel[x, y] == getNumUnmarkedNeighbors(x, y):
+            # this reduces the effective label of other tiles within the window.
+            print(self.getNumUnmarkedNeighbors(x, y))
+            if self.efflabel[x, y] == self.getNumUnmarkedNeighbors(x, y):
                 if ((x - 1) >= 0):
                     # top left
                     if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
                         self.type[x - 1, y - 1] == "marked"
-                        updateSurroundings(x - 1, y - 1)
+                        self.updateSurroundings(x - 1, y - 1)
                         return Action(AI.Action.FLAG, x - 1, y - 1)
                     # top center
                     elif (self.type[x - 1, y] == "unmarked"):
                         self.type[x - 1, y] == "marked"
-                        updateSurroundings(x - 1, y)
+                        self.updateSurroundings(x - 1, y)
                         return Action(AI.Action.FLAG, x - 1, y)
                     # top right
                     elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
                         self.type[x - 1, y + 1] == "marked"
-                        updateSurroundings(x - 1, y + 1)
+                        self.updateSurroundings(x - 1, y + 1)
                         return Action(AI.Action.FLAG, x - 1, y + 1)
                 # middle left
                 if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
                     self.type[x, y - 1] == "marked"
-                    updateSurroundings(x, y - 1)
+                    self.updateSurroundings(x, y - 1)
                     return Action(AI.Action.FLAG, x, y - 1)
                 # middle right
                 if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
                     self.type[x, y + 1] == "marked"
-                    updateSurroundings(x, y + 1)
+                    self.updateSurroundings(x, y + 1)
                     return Action(AI.Action.FLAG, x, y + 1)
                 # bottom row
                 if ((x + 1) < self.rowDimension):
                     # bottom left
                     if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
                         self.type[x + 1, y - 1] == "marked"
-                        updateSurroundings(x + 1, y - 1)
+                        self.updateSurroundings(x + 1, y - 1)
                         return Action(AI.Action.FLAG, x + 1, y - 1)
                     # bottom center
                     elif (self.type[x + 1, y] == "unmarked"):
                         self.type[x + 1, y] == "marked"
-                        updateSurroundings(x + 1, y)
+                        self.updateSurroundings(x + 1, y)
                         return Action(AI.Action.FLAG, x + 1, y)
                     # bottom right
                     elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
                         self.type[x + 1, y + 1] == "marked"
-                        updateSurroundings(x + 1, y + 1)
+                        self.updateSurroundings(x + 1, y + 1)
                         return Action(AI.Action.FLAG, x + 1, y + 1)
             
     
@@ -178,7 +179,7 @@ class MyAI( AI ):
     
     
     def getNumUnmarkedNeighbors(self, x: int, y: int):
-        return 9 - getNumMarkedNeighbors(x, y)- getNumUncoveredTiles(x, y)
+        return 9 - self.getNumMarkedNeighbors(x, y)- self.getNumUncoveredTiles(x, y)
     
     def getNumUncoveredTiles(self, x: int, y: int):
         uncoveredTiles = 0
@@ -230,3 +231,4 @@ class MyAI( AI ):
         self.efflabel[x - 1, y - 1]-=1
         self.efflabel[x - 1, y]-=1
         return
+
