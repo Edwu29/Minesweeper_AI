@@ -30,6 +30,7 @@ class MyAI( AI ):
         self.board = np.full((rowDimension, colDimension), -1) #label, effective label, type(covered, uncovered, flagged, unflagged)
         self.efflabel = np.full((rowDimension, colDimension), -1)
         self.type = np.full((rowDimension, colDimension), "unmarked")
+        print(self.type)
         #UNCOVER the startX and startY
         self.currentAction = Action(AI.Action.UNCOVER, startX, startY)
         
@@ -50,9 +51,9 @@ class MyAI( AI ):
             numMarkedNeighbors = self.getNumMarkedNeighbors(x, y)
             self.efflabel[x, y] = self.board[x, y] - numMarkedNeighbors
             
-            #print(x, y)
-            #print(self.efflabel[x, y])
-            #print(self.getNumUnmarkedNeighbors(x, y))
+            print(x, y)
+            print(self.efflabel[x, y])
+            print(self.getNumUnmarkedNeighbors(x, y))
             # check if self.efflabel[x, y] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
             if self.efflabel[x, y] == 0:
                 # check surrounding
@@ -67,37 +68,14 @@ class MyAI( AI ):
     def getNumMarkedNeighbors(self, x: int, y: int):
         numMarkedNeighbors = 0
         
-        try: 
-            if self.type[x - 1, y + 1] == "marked": numMarkedNeighbors +=1
-        except: pass
-        
-        try: 
-            if self.type[x, y + 1] == "marked": numMarkedNeighbors +=1
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y + 1] == "marked": numMarkedNeighbors +=1  
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y] == "marked": numMarkedNeighbors +=1  
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y - 1] == "marked": numMarkedNeighbors +=1 
-        except: pass
-        
-        try: 
-            if self.type[x, y - 1] == "marked": numMarkedNeighbors +=1 
-        except: pass
-        
-        try: 
-            if self.type[x - 1, y - 1] == "marked": numMarkedNeighbors +=1
-        except: pass
-        
-        try: 
-            if self.type[x - 1, y] == "marked": numMarkedNeighbors +=1 
-        except: pass
+        if self.isLegalSquare(x-1, y+1) and self.type[x - 1, y + 1] == "marked": numMarkedNeighbors +=1
+        if self.isLegalSquare(x, y+1) and self.type[x, y + 1] == "marked": numMarkedNeighbors +=1
+        if self.isLegalSquare(x+1, y+1) and self.type[x + 1, y + 1] == "marked": numMarkedNeighbors +=1
+        if self.isLegalSquare(x+1, y) and self.type[x + 1, y] == "marked": numMarkedNeighbors +=1
+        if self.isLegalSquare(x+1, y-1) and self.type[x + 1, y - 1] == "marked": numMarkedNeighbors +=1
+        if self.isLegalSquare(x, y-1) and self.type[x, y - 1] == "marked": numMarkedNeighbors +=1
+        if self.isLegalSquare(x-1, y-1) and self.type[x - 1, y - 1] == "marked": numMarkedNeighbors +=1
+        if self.isLegalSquare(x-1, y) and self.type[x - 1, y] == "marked": numMarkedNeighbors +=1
         
         return numMarkedNeighbors
     
@@ -105,74 +83,29 @@ class MyAI( AI ):
     def getNumUnmarkedNeighbors(self, x: int, y: int):
         unmarkedTiles = 0
         
-        try: 
-            if self.type[x - 1, y + 1] == "unmarked": unmarkedTiles +=1
-        except: pass
-        
-        try: 
-            if self.type[x, y + 1] == "unmarked": unmarkedTiles +=1
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y + 1] == "unmarked": unmarkedTiles +=1  
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y] == "unmarked": unmarkedTiles +=1  
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y - 1] == "unmarked": unmarkedTiles +=1 
-        except: pass
-        
-        try: 
-            if self.type[x, y - 1] == "unmarked": unmarkedTiles +=1 
-        except: pass
-        
-        try: 
-            if self.type[x - 1, y - 1] == "unmarked": unmarkedTiles +=1
-        except: pass
-        
-        try: 
-            if self.type[x - 1, y] == "unmarked": unmarkedTiles +=1 
-        except: pass
+        if self.isLegalSquare(x-1, y+1) and self.type[x - 1, y + 1] == "unmarked": unmarkedTiles +=1
+        if self.isLegalSquare(x, y+1) and self.type[x, y + 1] == "unmarked": unmarkedTiles +=1
+        if self.isLegalSquare(x+1, y+1) and self.type[x + 1, y + 1] == "unmarked": unmarkedTiles +=1
+        if self.isLegalSquare(x+1, y) and self.type[x + 1, y] == "unmarked": unmarkedTiles +=1
+        if self.isLegalSquare(x+1, y-1) and self.type[x + 1, y - 1] == "unmarked": unmarkedTiles +=1
+        if self.isLegalSquare(x, y-1) and self.type[x, y - 1] == "unmarked": unmarkedTiles +=1
+        if self.isLegalSquare(x-1, y-1) and self.type[x - 1, y - 1] == "unmarked": unmarkedTiles +=1
+        if self.isLegalSquare(x-1, y) and self.type[x - 1, y] == "unmarked": unmarkedTiles +=1
         
         return unmarkedTiles
     
     def getNumUncoveredTiles(self, x: int, y: int):
         uncoveredTiles = 0
         
-        try: 
-            if self.type[x - 1, y + 1] == "uncovered": uncoveredTiles +=1
-        except: pass
+        if self.isLegalSquare(x-1, y+1) and self.type[x - 1, y + 1] == "uncovered": uncoveredTiles +=1
+        if self.isLegalSquare(x, y+1) and self.type[x, y + 1] == "uncovered": uncoveredTiles +=1
+        if self.isLegalSquare(x+1, y+1) and self.type[x + 1, y + 1] == "uncovered": uncoveredTiles +=1
+        if self.isLegalSquare(x+1, y) and self.type[x + 1, y] == "uncovered": uncoveredTiles +=1
+        if self.isLegalSquare(x+1, y-1) and self.type[x + 1, y - 1] == "uncovered": uncoveredTiles +=1
+        if self.isLegalSquare(x, y-1) and self.type[x, y - 1] == "uncovered": uncoveredTiles +=1
+        if self.isLegalSquare(x-1, y-1) and self.type[x - 1, y - 1] == "uncovered": uncoveredTiles +=1
+        if self.isLegalSquare(x-1, y) and self.type[x - 1, y] == "uncovered": uncoveredTiles +=1
         
-        try: 
-            if self.type[x, y + 1] == "uncovered": uncoveredTiles +=1
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y + 1] == "uncovered": uncoveredTiles +=1  
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y] == "uncovered": uncoveredTiles +=1  
-        except: pass
-        
-        try: 
-            if self.type[x + 1, y - 1] == "uncovered": uncoveredTiles +=1 
-        except: pass
-        
-        try: 
-            if self.type[x, y - 1] == "uncovered": uncoveredTiles +=1 
-        except: pass
-        
-        try: 
-            if self.type[x - 1, y - 1] == "uncovered": uncoveredTiles +=1
-        except: pass
-        
-        try: 
-            if self.type[x - 1, y] == "uncovered": uncoveredTiles +=1 
-        except: pass
         
         return uncoveredTiles
     
@@ -288,3 +221,8 @@ class MyAI( AI ):
                 self.updateSurroundings(x + 1, y + 1)
                 self.currentAction = Action(AI.Action.FLAG, x + 1, y + 1)
                 return self.currentAction
+    def isLegalSquare(self, x: int, y: int):
+        if x>=0 and x<self.rowDimension and y>=0 and y<self.colDimension:
+            return True
+        else:
+            return False
