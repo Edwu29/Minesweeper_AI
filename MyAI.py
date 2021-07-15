@@ -9,7 +9,7 @@
 #
 # NOTES: 		- MyAI inherits from the abstract AI class in AI.py.
 #
-#				- DO NOT MAKE CHANGES TO THIS FILE.
+#				- DO NOT MAKE CHANGES TO THIS FILE. test
 # ==============================CS-199==================================
 
 from AI import AI

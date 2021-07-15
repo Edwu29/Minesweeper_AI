@@ -9,7 +9,7 @@
 #
 # NOTES: 		- MyAI inherits from the abstract AI class in AI.py.
 #
-#				- DO NOT MAKE CHANGES TO THIS FILE.
+#				- DO NOT MAKE CHANGES TO THIS FILE. test
 # ==============================CS-199==================================
 
 from AI import AI
@@ -65,6 +65,10 @@ class MyAI( AI ):
             if self.efflabel[x, y] == self.getNumUnmarkedNeighbors(x, y):
                 return self.markAndDecrementNeighbors(x, y)
     
+    
+    
+    
+    
     def getNumMarkedNeighbors(self, x: int, y: int):
         numMarkedNeighbors = 0
         
@@ -105,7 +109,6 @@ class MyAI( AI ):
         if self.isLegalSquare(x, y-1) and self.type[x, y - 1] == "uncovered": uncoveredTiles +=1
         if self.isLegalSquare(x-1, y-1) and self.type[x - 1, y - 1] == "uncovered": uncoveredTiles +=1
         if self.isLegalSquare(x-1, y) and self.type[x - 1, y] == "uncovered": uncoveredTiles +=1
-        
         
         return uncoveredTiles
     
