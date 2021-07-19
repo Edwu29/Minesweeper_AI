@@ -9,223 +9,190 @@
 #
 # NOTES: 		- MyAI inherits from the abstract AI class in AI.py.
 #
-#				- DO NOT MAKE CHANGES TO THIS FILE. test
+#				- DO NOT MAKE CHANGES TO THIS FILE.
 # ==============================CS-199==================================
 
+import random
 from AI import AI
 from Action import Action
 
-import numpy as np
-
 class MyAI( AI ):
-
     def __init__(self, rowDimension, colDimension, totalMines, startX, startY):
-        self.rowDimension = rowDimension
-        self.colDimension = colDimension
+        self.rowDimension = colDimension
+        self.colDimension = rowDimension
+        
+        self.lastMove = (startX, startY)  
         self.totalMines = totalMines
-        self.numUncovered = 0
-        self.numFlagged = 0
         
-        #create board
-        self.board = np.full((rowDimension, colDimension), -1) #label, effective label, type(covered, uncovered, flagged, unflagged)
-        self.efflabel = np.full((rowDimension, colDimension), -1)
-        self.type = np.full((rowDimension, colDimension), "unmarked")
-        print(self.type)
-        #UNCOVER the startX and startY
-        self.currentAction = Action(AI.Action.UNCOVER, startX, startY)
+        self.freeSquares = []
+        self.mines = []
         
+        self.grid = Grid(colDimension, rowDimension)
+
         
-    def getAction(self, number: int) -> "Action Object":
-        #successful goal state
-        if (self.rowDimension*self.colDimension) - self.totalMines == self.numUncovered:
+    def getAction(self, number: int) -> "Action Object":  
+        if number != -1:
+            self.grid.setSquare(self.lastMove[0], self.lastMove[1], number)
+        
+        if (len(self.freeSquares) > 0):
+            square = self.freeSquares.pop()
+            self.lastMove = (square[0], square[1])
+            return Action(AI.Action.UNCOVER, square[0], square[1])
+        if (len(self.grid.getUnmarkedSet()) == 0):
             return Action(AI.Action.LEAVE)
         
-        x=self.currentAction.getX()
-        y=self.currentAction.getY()
-        # if the previous action was an UNCOVER action, update the board
-        if number != -1:
-            self.type[x, y] = "uncovered"
-            self.board[x, y] = number
+        if (len(self.mines) > 0):
+            square = self.mines.pop()
+            self.grid.flagSquare(square[0], square[1])
+            return Action(AI.Action.FLAG, square[0], square[1])
+        if (len(self.grid.getFlaggedSet()) == self.totalMines):
+            self.freeSquares = self.grid.getUnmarkedSet()
         
-            #effectivelabel(x) = label(x) - numMarkedNeighbors(x)
-            numMarkedNeighbors = self.getNumMarkedNeighbors(x, y)
-            self.efflabel[x, y] = self.board[x, y] - numMarkedNeighbors
-            
-            print(x, y)
-            print(self.efflabel[x, y])
-            print(self.getNumUnmarkedNeighbors(x, y))
-            # check if self.efflabel[x, y] (effective label) == 0, we can uncover the unflagged(unmarked) tiles.
-            if self.efflabel[x, y] == 0:
-                # check surrounding
-                return self.uncoverUnmarkedTile(x, y)
+        square = self.grid.findFree()
+        if (square is not None):
+            self.lastMove = (square[0], square[1])
+            return Action(AI.Action.UNCOVER, square[0], square[1])
+        
+        li = self.grid.findMines()
+        if (li is not None):
+            square = li.pop()
+            self.grid.flagSquare(square[0], square[1])
+            for mine in li:
+                self.mines.append(mine)
+            return Action(AI.Action.FLAG, square[0], square[1])
+        
+        li = self.grid.getUnmarkedSet();
+        square = li[random.randint(0, len(li) - 1)]
+        self.lastMove = (square[0], square[1])
+        return Action(AI.Action.UNCOVER, square[0], square[1])
+    
+        
+class Grid():
+    def __init__(self, rowDimension, colDimension):
+        self.rowDimension = rowDimension
+        self.colDimension = colDimension
+        
+        self.markedDict = dict()
+        self.unmarkedSet = set()
+        self.flaggedSet = set()
+        
+        for i in range(rowDimension):
+            for j in range(colDimension):
+                self.unmarkedSet.add((i, j))
                 
-
-            # if self.efflabel[x, y] (effective label) == numUnmarkedNeighbors, then all of them must be mines, we can flag them,
-            # this reduces the effective label of other tiles within the window.
-            if self.efflabel[x, y] == self.getNumUnmarkedNeighbors(x, y):
-                return self.markAndDecrementNeighbors(x, y)
-    
-    
-    
-    
-    
-    def getNumMarkedNeighbors(self, x: int, y: int):
-        numMarkedNeighbors = 0
-        
-        if self.isLegalSquare(x-1, y+1) and self.type[x - 1, y + 1] == "marked": numMarkedNeighbors +=1
-        if self.isLegalSquare(x, y+1) and self.type[x, y + 1] == "marked": numMarkedNeighbors +=1
-        if self.isLegalSquare(x+1, y+1) and self.type[x + 1, y + 1] == "marked": numMarkedNeighbors +=1
-        if self.isLegalSquare(x+1, y) and self.type[x + 1, y] == "marked": numMarkedNeighbors +=1
-        if self.isLegalSquare(x+1, y-1) and self.type[x + 1, y - 1] == "marked": numMarkedNeighbors +=1
-        if self.isLegalSquare(x, y-1) and self.type[x, y - 1] == "marked": numMarkedNeighbors +=1
-        if self.isLegalSquare(x-1, y-1) and self.type[x - 1, y - 1] == "marked": numMarkedNeighbors +=1
-        if self.isLegalSquare(x-1, y) and self.type[x - 1, y] == "marked": numMarkedNeighbors +=1
-        
-        return numMarkedNeighbors
-    
-    
-    def getNumUnmarkedNeighbors(self, x: int, y: int):
-        unmarkedTiles = 0
-        
-        if self.isLegalSquare(x-1, y+1) and self.type[x - 1, y + 1] == "unmarked": unmarkedTiles +=1
-        if self.isLegalSquare(x, y+1) and self.type[x, y + 1] == "unmarked": unmarkedTiles +=1
-        if self.isLegalSquare(x+1, y+1) and self.type[x + 1, y + 1] == "unmarked": unmarkedTiles +=1
-        if self.isLegalSquare(x+1, y) and self.type[x + 1, y] == "unmarked": unmarkedTiles +=1
-        if self.isLegalSquare(x+1, y-1) and self.type[x + 1, y - 1] == "unmarked": unmarkedTiles +=1
-        if self.isLegalSquare(x, y-1) and self.type[x, y - 1] == "unmarked": unmarkedTiles +=1
-        if self.isLegalSquare(x-1, y-1) and self.type[x - 1, y - 1] == "unmarked": unmarkedTiles +=1
-        if self.isLegalSquare(x-1, y) and self.type[x - 1, y] == "unmarked": unmarkedTiles +=1
-        
-        return unmarkedTiles
-    
-    def getNumUncoveredTiles(self, x: int, y: int):
-        uncoveredTiles = 0
-        
-        if self.isLegalSquare(x-1, y+1) and self.type[x - 1, y + 1] == "uncovered": uncoveredTiles +=1
-        if self.isLegalSquare(x, y+1) and self.type[x, y + 1] == "uncovered": uncoveredTiles +=1
-        if self.isLegalSquare(x+1, y+1) and self.type[x + 1, y + 1] == "uncovered": uncoveredTiles +=1
-        if self.isLegalSquare(x+1, y) and self.type[x + 1, y] == "uncovered": uncoveredTiles +=1
-        if self.isLegalSquare(x+1, y-1) and self.type[x + 1, y - 1] == "uncovered": uncoveredTiles +=1
-        if self.isLegalSquare(x, y-1) and self.type[x, y - 1] == "uncovered": uncoveredTiles +=1
-        if self.isLegalSquare(x-1, y-1) and self.type[x - 1, y - 1] == "uncovered": uncoveredTiles +=1
-        if self.isLegalSquare(x-1, y) and self.type[x - 1, y] == "uncovered": uncoveredTiles +=1
-        
-        return uncoveredTiles
-    
-    def getCoordOfUnmarkedTile(self, x: int, y: int):
-        pass
-    
-    def updateSurroundings(self, x, y):
-        self.efflabel[x - 1, y + 1]-=1
-        self.efflabel[x, y + 1]-=1
-        self.efflabel[x + 1, y + 1]-=1
-        self.efflabel[x + 1, y]-=1
-        self.efflabel[x + 1, y - 1]-=1
-        self.efflabel[x, y - 1]-=1
-        self.efflabel[x - 1, y - 1]-=1
-        self.efflabel[x - 1, y]-=1
-        return
-    def uncoverUnmarkedTile(self, x: int, y: int):
-        # top
-        if ((x - 1) >= 0):
-            # top left
-            if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
-                self.type[x - 1, y - 1] = "uncovered"
-                self.currentAction = Action(AI.Action.UNCOVER, x - 1, y - 1)
-                return self.currentAction
-            # top center
-            elif (self.type[x - 1, y] == "unmarked"):
-                self.type[x - 1, y] = "uncovered"
-                self.currentAction = Action(AI.Action.UNCOVER, x - 1, y)
-                return self.currentAction
-            # top right
-            elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
-                self.type[x - 1, y + 1] = "uncovered"
-                self.currentAction = Action(AI.Action.UNCOVER, x - 1, y + 1)
-                return self.currentAction
-        # middle left
-        if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
-            self.type[x, y - 1] = "uncovered"
-            self.currentAction = Action(AI.Action.UNCOVER, x, y - 1)
-            return self.currentAction
-        # middle right
-        if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
-            self.type[x, y + 1] = "uncovered"
-            self.currentAction = Action(AI.Action.UNCOVER, x, y + 1)
-            return self.currentAction
-        # bottom row
-        if ((x + 1) < self.rowDimension):
-            # bottom left
-            if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
-                self.type[x + 1, y - 1] = "uncovered"
-                self.currentAction = Action(AI.Action.UNCOVER, x + 1, y - 1)
-                return self.currentAction
-            # bottom center
-            elif (self.type[x + 1, y] == "unmarked"):
-                self.type[x + 1, y] = "uncovered"
-                self.currentAction = Action(AI.Action.UNCOVER, x + 1, y)
-                return self.currentAction
-            # bottom right
-            elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
-                self.type[x + 1, y + 1] = "uncovered"
-                self.currentAction = Action(AI.Action.UNCOVER, x + 1, y + 1)
-                return self.currentAction 
+                
+    def setSquare(self, x, y, num):
+        if ((x, y) in self.unmarkedSet):
+            self.unmarkedSet.remove((x, y))
+            self.markedDict[(x, y)] = num - len(self.getFlaggedNeighbors(x, y))
+             
             
-    #Mark the tile and decrement its neighbors effective label by 1
-    def markAndDecrementNeighbors(self, x: int, y: int):
-        if ((x - 1) >= 0):
-            # top left
-            if ((y - 1) >= 0) and (self.type[x - 1, y - 1] == "unmarked"):
-                self.type[x - 1, y - 1] = "marked"
-                self.updateSurroundings(x - 1, y - 1)
-                self.currentAction = Action(AI.Action.FLAG, x - 1, y - 1)
-                return self.currentAction
-            # top center
-            elif (self.type[x - 1, y] == "unmarked"):
-                self.type[x - 1, y] = "marked"
-                self.updateSurroundings(x - 1, y)
-                self.currentAction = Action(AI.Action.FLAG, x - 1, y)
-                return self.currentAction
-            # top right
-            elif ((y + 1) < self.colDimension) and (self.type[x - 1, y + 1] == "unmarked"):
-                self.type[x - 1, y + 1] = "marked"
-                self.updateSurroundings(x - 1, y + 1)
-                self.currentAction = Action(AI.Action.FLAG, x - 1, y + 1)
-                return self.currentAction
-        # middle left
-        if ((y - 1) >= 0) and (self.type[x, y - 1] == "unmarked"):
-            self.type[x, y - 1] = "marked"
-            self.updateSurroundings(x, y - 1)
-            self.currentAction = Action(AI.Action.FLAG, x, y - 1)
-            return self.currentAction
-        # middle right
-        if ((y + 1) < self.colDimension) and (self.type[x, y + 1] == "unmarked"):
-            self.type[x, y + 1] = "marked"
-            self.updateSurroundings(x, y + 1)
-            self.currentAction = Action(AI.Action.FLAG, x, y + 1)
-            return self.currentAction
-        # bottom row
-        if ((x + 1) < self.rowDimension):
-            # bottom left
-            if ((y - 1) >= 0) and (self.type[x + 1, y - 1] == "unmarked"):
-                self.type[x + 1, y - 1] = "marked"
-                self.updateSurroundings(x + 1, y - 1)
-                self.currentAction = Action(AI.Action.FLAG, x + 1, y - 1)
-                return self.currentAction
-            # bottom center
-            elif (self.type[x + 1, y] == "unmarked"):
-                self.type[x + 1, y] = "marked"
-                self.updateSurroundings(x + 1, y)
-                self.currentAction = Action(AI.Action.FLAG, x + 1, y)
-                return self.currentAction
-            # bottom right
-            elif ((y + 1) < self.colDimension) and (self.type[x + 1, y + 1] == "unmarked"):
-                self.type[x + 1, y + 1] = "marked"
-                self.updateSurroundings(x + 1, y + 1)
-                self.currentAction = Action(AI.Action.FLAG, x + 1, y + 1)
-                return self.currentAction
-    def isLegalSquare(self, x: int, y: int):
-        if x>=0 and x<self.rowDimension and y>=0 and y<self.colDimension:
-            return True
-        else:
-            return False
+    def getUnmarkedSet(self):
+        return list(self.unmarkedSet)
+    
+    
+    def getFlaggedSet(self):
+        return list(self.flaggedSet)
+    
+    
+    def findMines(self):
+        for key, num in self.markedDict.items():
+            li = self.getUnmarkedNeighbors(key[0], key[1])
+            if (num != 0) and (num == len(li)):
+                return li
+        return None
+
+       
+    def flagSquare(self, x, y):
+        self.unmarkedSet.remove((x, y))
+        self.flaggedSet.add((x, y))
+        self.decrementNeighbors(x, y)
+    
+    
+    def findFree(self):
+        for key, num in self.markedDict.items():
+            i = key[0]
+            j = key[1]
+            if (0 == num):
+                if ((i - 1, j - 1) in self.unmarkedSet):
+                    return (i - 1, j - 1)
+                elif ((i - 1, j) in self.unmarkedSet):
+                    return (i - 1, j)
+                elif ((i - 1, j + 1) in self.unmarkedSet):
+                    return (i - 1, j + 1)
+                elif ((i, j - 1) in self.unmarkedSet):
+                    return (i, j - 1)
+                elif ((i, j + 1) in self.unmarkedSet):
+                    return (i, j + 1)
+                elif ((i + 1, j - 1) in self.unmarkedSet):
+                    return (i + 1, j - 1)
+                elif ((i + 1, j) in self.unmarkedSet):
+                    return (i + 1, j)
+                elif ((i + 1, j + 1) in self.unmarkedSet):
+                    return (i + 1, j + 1)  
+        return None
+        
+    
+    def decrementNeighbors(self, x, y):
+        if ((x - 1, y - 1) in self.markedDict):
+            self.markedDict[(x - 1, y - 1)] -= 1
+        if ((x - 1, y) in self.markedDict):
+            self.markedDict[(x - 1, y)] -= 1
+        if ((x - 1, y + 1) in self.markedDict):
+            self.markedDict[(x - 1, y + 1)] -= 1
+        if ((x, y - 1) in self.markedDict):
+            self.markedDict[(x, y - 1)] -= 1
+        if ((x, y + 1) in self.markedDict):
+            self.markedDict[(x, y + 1)] -= 1
+        if ((x + 1, y - 1) in self.markedDict):
+            self.markedDict[(x + 1, y - 1)] -= 1
+        if ((x + 1, y) in self.markedDict):
+            self.markedDict[(x + 1, y)] -= 1
+        if ((x + 1, y + 1) in self.markedDict):
+            self.markedDict[(x + 1, y + 1)] -= 1
+        
+    
+    def getUnmarkedNeighbors(self, x, y):
+        li = []
+        
+        if ((x - 1, y - 1) in self.unmarkedSet):
+            li.append((x - 1, y - 1))
+        if ((x - 1, y) in self.unmarkedSet):
+            li.append((x - 1, y))
+        if ((x - 1, y + 1) in self.unmarkedSet):
+            li.append((x - 1, y + 1))
+        if ((x, y - 1) in self.unmarkedSet):
+            li.append((x, y - 1))
+        if ((x, y + 1) in self.unmarkedSet):
+            li.append((x, y + 1))
+        if ((x + 1, y - 1) in self.unmarkedSet):
+            li.append((x + 1, y - 1))
+        if ((x + 1, y) in self.unmarkedSet):
+            li.append((x + 1, y))
+        if ((x + 1, y + 1) in self.unmarkedSet):
+            li.append((x + 1, y + 1))
+        
+        return li
+    
+    
+    def getFlaggedNeighbors(self, x, y):
+        li = []
+        
+        if ((x - 1, y - 1) in self.flaggedSet):
+            li.append((x - 1, y - 1))
+        if ((x - 1, y) in self.flaggedSet):
+            li.append((x - 1, y))
+        if ((x - 1, y + 1) in self.flaggedSet):
+            li.append((x - 1, y + 1))
+        if ((x, y - 1) in self.flaggedSet):
+            li.append((x, y - 1))
+        if ((x, y + 1) in self.flaggedSet):
+            li.append((x, y + 1))
+        if ((x + 1, y - 1) in self.flaggedSet):
+            li.append((x + 1, y - 1))
+        if ((x + 1, y) in self.flaggedSet):
+            li.append((x + 1, y))
+        if ((x + 1, y + 1) in self.flaggedSet):
+            li.append((x + 1, y + 1))
+        
+        return li
