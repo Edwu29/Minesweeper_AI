@@ -28,7 +28,7 @@ class MyAI( AI ):
         self.mines = []
         
         self.grid = Grid(colDimension, rowDimension)
-
+        
         
     def getAction(self, number: int) -> "Action Object":  
         if number != -1:
@@ -44,6 +44,7 @@ class MyAI( AI ):
         if (len(self.mines) > 0):
             square = self.mines.pop()
             self.grid.flagSquare(square[0], square[1])
+            self.lastMove = (square[0], square[1])
             return Action(AI.Action.FLAG, square[0], square[1])
         if (len(self.grid.getFlaggedSet()) == self.totalMines):
             self.freeSquares = self.grid.getUnmarkedSet()
@@ -59,8 +60,25 @@ class MyAI( AI ):
             self.grid.flagSquare(square[0], square[1])
             for mine in li:
                 self.mines.append(mine)
+            self.lastMove = (square[0], square[1])
             return Action(AI.Action.FLAG, square[0], square[1])
         
+    #model checking logic begin
+        square = self.lastMove
+        #getting covered frontier
+        self.grid.getFrontier(square[0], square[1])
+        coveredFrontier = self.grid.getCoveredFrontierSet()
+        #getting uncovered frontier
+        uncoveredFrontier = self.grid.getUncoveredFrontierSet()
+        
+        
+        
+        
+    #model checking logic end
+    
+    
+    
+    #if all else fails, guess
         li = self.grid.getUnmarkedSet();
         square = li[random.randint(0, len(li) - 1)]
         self.lastMove = (square[0], square[1])
@@ -75,6 +93,9 @@ class Grid():
         self.markedDict = dict()
         self.unmarkedSet = set()
         self.flaggedSet = set()
+        
+        self.coveredFrontier = set()
+        self.uncoveredFrontier = set()
         
         for i in range(rowDimension):
             for j in range(colDimension):
@@ -94,6 +115,11 @@ class Grid():
     def getFlaggedSet(self):
         return list(self.flaggedSet)
     
+    def getUncoveredFrontierSet(self):
+        return list(self.uncoveredFrontier)
+    
+    def getCoveredFrontierSet(self):
+        return list(self.coveredFrontier)
     
     def findMines(self):
         for key, num in self.markedDict.items():
@@ -155,25 +181,46 @@ class Grid():
     def getUnmarkedNeighbors(self, x, y):
         li = []
         
-        if ((x - 1, y - 1) in self.unmarkedSet):
+        if ((x - 1, y - 1) in self.unmarkedSet and (x - 1, y - 1) not in self.flaggedSet):
             li.append((x - 1, y - 1))
-        if ((x - 1, y) in self.unmarkedSet):
+        if ((x - 1, y) in self.unmarkedSet and (x - 1, y) not in self.flaggedSet):
             li.append((x - 1, y))
-        if ((x - 1, y + 1) in self.unmarkedSet):
+        if ((x - 1, y + 1) in self.unmarkedSet and (x - 1, y + 1) not in self.flaggedSet):
             li.append((x - 1, y + 1))
-        if ((x, y - 1) in self.unmarkedSet):
+        if ((x, y - 1) in self.unmarkedSet and (x, y - 1) not in self.flaggedSet):
             li.append((x, y - 1))
-        if ((x, y + 1) in self.unmarkedSet):
+        if ((x, y + 1) in self.unmarkedSet and (x, y + 1) not in self.flaggedSet):
             li.append((x, y + 1))
-        if ((x + 1, y - 1) in self.unmarkedSet):
+        if ((x + 1, y - 1) in self.unmarkedSet and (x + 1, y - 1) not in self.flaggedSet):
             li.append((x + 1, y - 1))
-        if ((x + 1, y) in self.unmarkedSet):
+        if ((x + 1, y) in self.unmarkedSet and (x + 1, y) not in self.flaggedSet):
             li.append((x + 1, y))
-        if ((x + 1, y + 1) in self.unmarkedSet):
+        if ((x + 1, y + 1) in self.unmarkedSet and (x + 1, y + 1) not in self.flaggedSet):
             li.append((x + 1, y + 1))
         
         return li
     
+    def getMarkedNeighbors(self, x, y):
+        li = []
+        
+        if ((x - 1, y - 1) in self.markedDict):
+            li.append((x - 1, y - 1))
+        if ((x - 1, y) in self.markedDict):
+            li.append((x - 1, y))
+        if ((x - 1, y + 1) in self.markedDict):
+            li.append((x - 1, y + 1))
+        if ((x, y - 1) in self.markedDict):
+            li.append((x, y - 1))
+        if ((x, y + 1) in self.markedDict):
+            li.append((x, y + 1))
+        if ((x + 1, y - 1) in self.markedDict):
+            li.append((x + 1, y - 1))
+        if ((x + 1, y) in self.markedDict):
+            li.append((x + 1, y))
+        if ((x + 1, y + 1) in self.markedDict):
+            li.append((x + 1, y + 1))
+        
+        return li
     
     def getFlaggedNeighbors(self, x, y):
         li = []
@@ -196,3 +243,44 @@ class Grid():
             li.append((x + 1, y + 1))
         
         return li
+    def getFrontier(self, x, y):
+        #assuming the first x and y are uncovered frontier
+        if ((x, y) in self.markedDict):
+            self.uncoveredFrontier.add((x, y))
+            self.getCoveredFrontier([(x, y)]) # this is a recursive call
+            
+        elif((x, y) in self.unmarkedSet):
+            self.coveredFrontier.add((x, y))
+            self.getUncoveredFrontier([(x, y)]) # this is a recursive call
+        
+    def getCoveredFrontier(self, uncovered):
+        li = []
+        #print("uncovered" + str(uncovered))
+        
+        if uncovered == []:
+            return None
+        
+        for square in uncovered:
+            x = square[0]
+            y = square[1]
+            arr = self.getUnmarkedNeighbors(x, y)
+            li = [x for x in arr if x not in self.coveredFrontier]
+            
+        self.coveredFrontier.update(li)
+        self.getUncoveredFrontier(list(li)) #kinda like recursive call
+        
+    def getUncoveredFrontier(self, covered):
+        li = []
+        #print("covered" + str(covered))
+        if covered == []:
+            return None
+        
+        for square in covered:
+            x = square[0]
+            y = square[1]
+            
+            arr = self.getMarkedNeighbors(x, y)
+            li = [x for x in arr if x not in self.uncoveredFrontier]
+        
+        self.uncoveredFrontier.update(li)
+        self.getCoveredFrontier(list(li))
