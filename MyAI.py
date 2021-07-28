@@ -38,7 +38,7 @@ class MyAI( AI ):
             square = self.freeSquares.pop()
             self.lastMove = (square[0], square[1])
             return Action(AI.Action.UNCOVER, square[0], square[1])
-        if (len(self.grid.getUnmarkedSet()) == 0):
+        if (len(self.grid.getUnmarkedDict()) == 0):
             return Action(AI.Action.LEAVE)
         
         if (len(self.mines) > 0):
@@ -46,7 +46,7 @@ class MyAI( AI ):
             self.grid.flagSquare(square[0], square[1])
             return Action(AI.Action.FLAG, square[0], square[1])
         if (len(self.grid.getFlaggedSet()) == self.totalMines):
-            self.freeSquares = self.grid.getUnmarkedSet()
+            self.freeSquares = list(self.grid.getUnmarkedDict().keys())
         
         square = self.grid.findFree()
         if (square is not None):
@@ -61,7 +61,20 @@ class MyAI( AI ):
                 self.mines.append(mine)
             return Action(AI.Action.FLAG, square[0], square[1])
         
-        li = self.grid.getUnmarkedSet();
+        ###
+        unmarkedDict = self.grid.getUnmarkedDict()
+        flipped = dict([(value, key) for key, value in unmarkedDict.items()])
+        
+        li = list(flipped.keys())
+        if (li) and (-1 in li):
+            li.remove(-1)
+        if (li):
+            square = flipped[min(li)]
+            self.lastMove = (square[0], square[1])
+            return Action(AI.Action.UNCOVER, square[0], square[1])
+        ###
+        
+        li = list(self.grid.getUnmarkedDict().keys())
         square = li[random.randint(0, len(li) - 1)]
         self.lastMove = (square[0], square[1])
         return Action(AI.Action.UNCOVER, square[0], square[1])
@@ -73,26 +86,45 @@ class Grid():
         self.colDimension = colDimension
         
         self.markedDict = dict()
-        self.unmarkedSet = set()
+        self.unmarkedDict = dict()
         self.flaggedSet = set()
         
         for i in range(rowDimension):
             for j in range(colDimension):
-                self.unmarkedSet.add((i, j))
+                self.unmarkedDict[(i, j)] = -1
                 
                 
     def setSquare(self, x, y, num):
-        if ((x, y) in self.unmarkedSet):
-            self.unmarkedSet.remove((x, y))
+        if ((x, y) in self.unmarkedDict):
+            del self.unmarkedDict[(x, y)]
             self.markedDict[(x, y)] = num - len(self.getFlaggedNeighbors(x, y))
-             
+            self.setProbability(x, y)
+        
+    
+    def getMarkedDict(self):
+        return self.markedDict
             
-    def getUnmarkedSet(self):
-        return list(self.unmarkedSet)
+            
+    def getUnmarkedDict(self):
+        return self.unmarkedDict
     
     
     def getFlaggedSet(self):
         return list(self.flaggedSet)
+    
+    
+    def setProbability(self, x, y):
+        li = self.getUnmarkedNeighbors(x, y)
+        prob = 1 if not li else self.markedDict[(x, y)] / len(li)
+        for square in li:
+            i = square[0]
+            j = square[1]
+            if (self.unmarkedDict[(i, j)] == -1):
+                self.unmarkedDict[(i, j)] = prob
+            else:
+#                 self.unmarkedDict[(i, j)] = (self.unmarkedDict[(i, j)] + prob) / 1.85
+                self.unmarkedDict[(i, j)] = self.unmarkedDict[(i, j)] + prob - (max(self.unmarkedDict[(i, j)], prob) / 1.3)
+#                 self.unmarkedDict[(i, j)] = self.unmarkedDict[(i, j)] + prob - (min(self.unmarkedDict[(i, j)], prob) / 2)
     
     
     def findMines(self):
@@ -101,10 +133,10 @@ class Grid():
             if (num != 0) and (num == len(li)):
                 return li
         return None
-
+    
        
     def flagSquare(self, x, y):
-        self.unmarkedSet.remove((x, y))
+        del self.unmarkedDict[(x, y)]
         self.flaggedSet.add((x, y))
         self.decrementNeighbors(x, y)
     
@@ -114,21 +146,21 @@ class Grid():
             i = key[0]
             j = key[1]
             if (0 == num):
-                if ((i - 1, j - 1) in self.unmarkedSet):
+                if ((i - 1, j - 1) in self.unmarkedDict):
                     return (i - 1, j - 1)
-                elif ((i - 1, j) in self.unmarkedSet):
+                elif ((i - 1, j) in self.unmarkedDict):
                     return (i - 1, j)
-                elif ((i - 1, j + 1) in self.unmarkedSet):
+                elif ((i - 1, j + 1) in self.unmarkedDict):
                     return (i - 1, j + 1)
-                elif ((i, j - 1) in self.unmarkedSet):
+                elif ((i, j - 1) in self.unmarkedDict):
                     return (i, j - 1)
-                elif ((i, j + 1) in self.unmarkedSet):
+                elif ((i, j + 1) in self.unmarkedDict):
                     return (i, j + 1)
-                elif ((i + 1, j - 1) in self.unmarkedSet):
+                elif ((i + 1, j - 1) in self.unmarkedDict):
                     return (i + 1, j - 1)
-                elif ((i + 1, j) in self.unmarkedSet):
+                elif ((i + 1, j) in self.unmarkedDict):
                     return (i + 1, j)
-                elif ((i + 1, j + 1) in self.unmarkedSet):
+                elif ((i + 1, j + 1) in self.unmarkedDict):
                     return (i + 1, j + 1)  
         return None
         
@@ -136,40 +168,48 @@ class Grid():
     def decrementNeighbors(self, x, y):
         if ((x - 1, y - 1) in self.markedDict):
             self.markedDict[(x - 1, y - 1)] -= 1
+#             self.setProbability(x - 1, y - 1)
         if ((x - 1, y) in self.markedDict):
             self.markedDict[(x - 1, y)] -= 1
+#             self.setProbability(x - 1, y)
         if ((x - 1, y + 1) in self.markedDict):
             self.markedDict[(x - 1, y + 1)] -= 1
+#             self.setProbability(x - 1, y + 1)
         if ((x, y - 1) in self.markedDict):
             self.markedDict[(x, y - 1)] -= 1
+#             self.setProbability(x, y - 1)
         if ((x, y + 1) in self.markedDict):
             self.markedDict[(x, y + 1)] -= 1
+#             self.setProbability(x, y + 1)
         if ((x + 1, y - 1) in self.markedDict):
             self.markedDict[(x + 1, y - 1)] -= 1
+#             self.setProbability(x + 1, y - 1) 
         if ((x + 1, y) in self.markedDict):
             self.markedDict[(x + 1, y)] -= 1
+#             self.setProbability(x + 1, y)
         if ((x + 1, y + 1) in self.markedDict):
             self.markedDict[(x + 1, y + 1)] -= 1
+#             self.setProbability(x + 1, y + 1)
         
     
     def getUnmarkedNeighbors(self, x, y):
         li = []
         
-        if ((x - 1, y - 1) in self.unmarkedSet):
+        if ((x - 1, y - 1) in self.unmarkedDict):
             li.append((x - 1, y - 1))
-        if ((x - 1, y) in self.unmarkedSet):
+        if ((x - 1, y) in self.unmarkedDict):
             li.append((x - 1, y))
-        if ((x - 1, y + 1) in self.unmarkedSet):
+        if ((x - 1, y + 1) in self.unmarkedDict):
             li.append((x - 1, y + 1))
-        if ((x, y - 1) in self.unmarkedSet):
+        if ((x, y - 1) in self.unmarkedDict):
             li.append((x, y - 1))
-        if ((x, y + 1) in self.unmarkedSet):
+        if ((x, y + 1) in self.unmarkedDict):
             li.append((x, y + 1))
-        if ((x + 1, y - 1) in self.unmarkedSet):
+        if ((x + 1, y - 1) in self.unmarkedDict):
             li.append((x + 1, y - 1))
-        if ((x + 1, y) in self.unmarkedSet):
+        if ((x + 1, y) in self.unmarkedDict):
             li.append((x + 1, y))
-        if ((x + 1, y + 1) in self.unmarkedSet):
+        if ((x + 1, y + 1) in self.unmarkedDict):
             li.append((x + 1, y + 1))
         
         return li
