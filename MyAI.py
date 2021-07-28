@@ -16,6 +16,7 @@ import random
 from AI import AI
 from Action import Action
 
+from collections import defaultdict
 class MyAI( AI ):
     def __init__(self, rowDimension, colDimension, totalMines, startX, startY):
         self.rowDimension = colDimension
@@ -71,19 +72,73 @@ class MyAI( AI ):
         #getting uncovered frontier
         uncoveredFrontier = self.grid.getUncoveredFrontierSet()
         
+        #assigning 1 and 0s for each value in coveredFrontier
+        numOfBits = len(coveredFrontier)
+        option = "0" + str(numOfBits) + "b"
         
+        count = defaultdict(int)
+        for i in range (pow(2, numOfBits)): #enumerating each assignment.
+            bitRepresentation = format(i, option)
+            #assign each c in coveredFrontier a bit from bitRepresentation
+            assignments = {} #stores tiles as keys and the value as the assignment. Ex: key: (2, 3), value: 1 or key: (4, 8),
+                                                                                                                   #value: 0
+            for i, c in enumerate(coveredFrontier):
+                assignments[c] = bitRepresentation[i]
+                
+            if self.isAssignmentsConsistent(assignments, uncoveredFrontier) == True: #if assignment is consistent
+                #count the 0s and 1s for each tile.
+                print("it goes here!!!!!")
+                for square in assignments.keys():
+                    if assignments[square] == 1:
+                        count[square]+=1
+                
+         #now we have a "count" dictionary. Each key represents a tile and the value is the number of times a model contains 1 in
+                                                                                                                        #that tile
+        for element in count.keys():
+            if count[element] == 0:
+                self.freeSquares.append(element)
+            if count[element] == 1:
+                self.mines.append(element)
+                
+            
+        if (len(self.freeSquares) > 0):
+            square = self.freeSquares.pop()
+            self.lastMove = (square[0], square[1])
+            return Action(AI.Action.UNCOVER, square[0], square[1])
         
-        
+        if (len(self.mines) > 0):
+            square = self.mines.pop()
+            self.grid.flagSquare(square[0], square[1])
+            self.lastMove = (square[0], square[1])
+            return Action(AI.Action.FLAG, square[0], square[1])
     #model checking logic end
     
     
     
     #if all else fails, guess
+        print("guessing here!!")
         li = self.grid.getUnmarkedSet();
         square = li[random.randint(0, len(li) - 1)]
         self.lastMove = (square[0], square[1])
         return Action(AI.Action.UNCOVER, square[0], square[1])
     
+    
+    def isAssignmentsConsistent(self, assignments, uncoveredFrontier):
+        #for each uncoveredFrontier, check if their effective label is satisfied. Adding the covered neighbors should be equal to the EF label
+        for u in uncoveredFrontier:
+            effLabel = self.grid.markedDict[u]
+            coveredNeighbors = self.grid.getUnmarkedNeighbors(u[0], u[1])
+            
+            count = 0
+            for c in coveredNeighbors:
+                if assignments[c] == 1:
+                    count+=1
+            
+            if count != effLabel:
+                return False
+        
+        return True
+        
         
 class Grid():
     def __init__(self, rowDimension, colDimension):
