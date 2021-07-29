@@ -84,7 +84,7 @@ class MyAI( AI ):
             assignments = {} #stores tiles as keys and the value as the assignment. Ex: key: (2, 3), value: 1 or key: (4, 8),
                                                                                                                    #value: 0
             for i, c in enumerate(coveredFrontier):
-                assignments[c] = bitRepresentation[i]
+                assignments[c] = int(bitRepresentation[i])
                 
             if self.isAssignmentsConsistent(assignments, uncoveredFrontier) == True: #if assignment is consistent
                 #count the 0s and 1s for each tile.
@@ -118,7 +118,7 @@ class MyAI( AI ):
     
     
     #if all else fails, guess
-        #print("guessing here!!")
+        print("guessing here!!")
         li = self.grid.getUnmarkedSet();
         square = li[random.randint(0, len(li) - 1)]
         self.lastMove = (square[0], square[1])
