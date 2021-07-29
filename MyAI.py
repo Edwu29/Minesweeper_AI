@@ -78,7 +78,7 @@ class MyAI( AI ):
         
         count = defaultdict(int)
         numOfModels = 0
-        for i in range (pow(2, numOfBits)): #enumerating each assignment.
+        for i in range(pow(2, numOfBits)): #enumerating each assignment.
             bitRepresentation = format(i, option)
             #assign each c in coveredFrontier a bit from bitRepresentation
             assignments = {} #stores tiles as keys and the value as the assignment. Ex: key: (2, 3), value: 1 or key: (4, 8),
@@ -96,6 +96,8 @@ class MyAI( AI ):
                 
          #now we have a "count" dictionary. Each key represents a tile and the value is the number of times a model contains 1 in
                                                                                                                         #that tile
+        print(count)
+        print(numOfModels)
         for element in count.keys():
             if count[element]/numOfModels == 0:
                 self.freeSquares.append(element)
@@ -118,7 +120,7 @@ class MyAI( AI ):
     
     
     #if all else fails, guess
-        print("guessing here!!")
+        #print("guessing here!!")
         li = self.grid.getUnmarkedSet();
         square = li[random.randint(0, len(li) - 1)]
         self.lastMove = (square[0], square[1])
@@ -133,7 +135,7 @@ class MyAI( AI ):
             
             count = 0
             for c in coveredNeighbors:
-                if assignments[c] == 1:
+                if c in assignments and assignments[c] == 1:
                     count+=1
             
             if count != effLabel:
@@ -340,3 +342,8 @@ class Grid():
         
         self.uncoveredFrontier.update(li)
         self.getCoveredFrontier(list(li))
+        
+        
+        
+        
+        
