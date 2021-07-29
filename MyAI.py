@@ -133,14 +133,13 @@ class MyAI( AI ):
             
             count = 0
             for c in coveredNeighbors:
-                if c in assignments:
+                if assignments[c] == 1:
                     count+=1
             
             if count != effLabel:
                 return False
         
         return True
-        
         
 class Grid():
     def __init__(self, rowDimension, colDimension):
